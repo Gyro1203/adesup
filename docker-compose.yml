@@ -9,9 +9,9 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - test-db:/var/lib/mysql
+      - adesup_db:/var/lib/mysql
     networks:
-      - wpsite-test
+      - adesup
 
   wordpress:
     image: wordpress:6.8.3
@@ -26,14 +26,34 @@ services:
       WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
     volumes:
-      - ./wp-content:/var/www/html/wp-content
+      - wp-data:/var/www/html
       - ./uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
     networks:
-      - wpsite-test
-
+      - adesup
+  
+  wpcli-import:
+    image: wordpress:cli
+    depends_on:
+      - wordpress
+    restart: on-failure:5
+    user: root
+    environment:
+      WORDPRESS_DB_HOST: dbadesup
+      WORDPRESS_DB_PORT: 3306
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+    volumes:
+      - wp-data:/var/www/html
+      - ./scripts/install.sh:/install.sh
+    working_dir: /var/www/html
+    entrypoint: ["sh", "/install.sh"]
+    networks:
+      - adesup
 
 networks:
-  wpsite-test:
+  adesup:
 
 volumes:
-  test-db:
+  adesup_db:
+  wp-data:

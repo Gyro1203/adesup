@@ -1,0 +1,6 @@
+.env
+/backups/
+/db-data/
+/wp-data/
+*.sql
+*.wpress
